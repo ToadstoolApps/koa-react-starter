@@ -1,7 +1,10 @@
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
+const dotenv = require('dotenv');
 
+dotenv.config();
+const { SHOPIFY_APP_KEY, SHOPIFY_APP_SECRET, SHOPIFY_APP_HOST } = process.env;
 const env = process.env.NODE_ENV || 'development';
 
 let base = {
@@ -10,17 +13,9 @@ let base = {
   isDev: env === 'development',
   isTest: env === 'test',
   session: {
-    secret: 'dev_secret',
-    ttl: 3600 * 10000,
-    store: {
-      host: 'redis',
-      port: 6379,
-    },
-  },
-  jwt: {
-    secret: 'jwt_secret',
-    audience: 'api',
-    issuer: 'api',
+    SHOPIFY_APP_KEY,
+    SHOPIFY_APP_SECRET,
+    SHOPIFY_APP_HOST,
   },
 };
 

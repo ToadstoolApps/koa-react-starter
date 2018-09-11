@@ -1,26 +1,56 @@
+require('isomorphic-fetch');
 const path = require('path');
 const requestLogger = require('koa-logger');
 const serve = require('koa-static');
 const mount = require('koa-mount');
 const views = require('koa-views');
-const session = require('koa-generic-session');
+const route = require('koa-route');
+const session = require('koa-session');
+const { default: shopifyAuth, verifyRequest } = require('@shopify/koa-shopify-auth');
 const handlebars = require('handlebars');
 
 const config = require('config');
 
-const redisStore = require('koa-redis')(config.session.store);
-
+const { SHOPIFY_APP_KEY, SHOPIFY_APP_SECRET, SHOPIFY_APP_HOST } = config.session;
 const { logger } = global;
 
-const routes = require('./routes');
 const hmr = require('../hmr');
 
 const pathToViews = path.join(__dirname, './../../client/views');
 const pathToStatic = path.join(__dirname, './../../client/static');
 handlebars.registerHelper('json', context => JSON.stringify(context));
 
+const renderApp = async (ctx) => {
+  const data = {
+    isDev: config.isDev,
+    config: {
+      apiUrl: config.apiUrl,
+    },
+    user: {},
+    token: '',
+  };
+  return ctx.render('index', data);
+};
+
 module.exports = async (app) => {
   app.use(requestLogger());
+  app.keys = [SHOPIFY_APP_SECRET]; // eslint-disable-line
+  app.use(session(app));
+
+  app.use(
+    shopifyAuth({
+      prefix: '/shopify',
+      apiKey: SHOPIFY_APP_KEY,
+      secret: SHOPIFY_APP_SECRET,
+      scopes: ['write_orders, write_products'],
+      afterAuth(ctx) {
+        // const {shop, accessToken} = ctx.session;
+        // console.log('We did it!', accessToken);
+        ctx.redirect('/');
+      },
+    }),
+  );
+
   app.use(views(config.isDev ? pathToViews : pathToStatic, {
     default: 'html',
     map: { html: 'handlebars' },
@@ -38,11 +68,8 @@ module.exports = async (app) => {
     app.use(mount('/static', serve(pathToStatic)));
   }
 
-  app.keys = [config.session.secret]; // eslint-disable-line
-  app.use(session({
-    store: redisStore,
-    ttl: config.session.ttl,
-  }));
+  app.use(route.get('/install', async (ctx, next) => { await ctx.render('install'); }));
+  app.use(verifyRequest({ fallbackRoute: '/install' }));
 
   app.use(async (ctx, next) => {
     try {
@@ -55,6 +82,5 @@ module.exports = async (app) => {
       };
     }
   });
-
-  app.use(routes);
+  app.use(renderApp);
 };
