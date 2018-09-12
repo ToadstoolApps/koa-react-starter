@@ -8,6 +8,9 @@ import createHistory from 'history/createBrowserHistory';
 import type { BrowserHistory } from 'history/createBrowserHistory';
 import { ConnectedRouter } from 'connected-react-router';
 
+import { AppProvider, Page, Card, Button } from '@shopify/polaris';
+import { Link } from 'react-router-dom';
+
 import type { StateType, StoreType } from './resources/types';
 
 import routes from './routes';
@@ -28,15 +31,26 @@ const initialState: StateType = {
 
 const history: BrowserHistory = createHistory();
 const store: StoreType = configureStore(initialState, history);
+const CustomLinkComponent = ({ children, url, ...rest }): Node => {
+  return (
+    <Link to={url} {...rest}>
+      {children}
+    </Link>
+  );
+};
 
 const Root = (): Node => (
-  <Provider store={store}>
-    <ConnectedRouter history={history}>
-      <Layout>
-        {routes()}
-      </Layout>
-    </ConnectedRouter>
-  </Provider>
+  <AppProvider linkComponent={CustomLinkComponent}>
+    <Provider store={store}>
+      <ConnectedRouter history={history}>
+        <Page title="Example app">
+          <Card sectioned>
+            <Button onClick={() => alert('Button clicked!')}>Example button</Button>
+          </Card>
+        </Page>
+      </ConnectedRouter>
+    </Provider>
+  </AppProvider>
 );
 
 const renderApp = () => {

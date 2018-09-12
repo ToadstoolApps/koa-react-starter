@@ -9,6 +9,7 @@ module.exports = {
       'babel-polyfill',
       'react-hot-loader/patch',
       './index.jsx',
+      '@shopify/polaris/styles.css',
     ],
   },
 
@@ -42,6 +43,10 @@ module.exports = {
           },
           { loader: 'postcss-loader' },
         ],
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },

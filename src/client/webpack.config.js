@@ -52,7 +52,7 @@ module.exports = {
   mode: 'production',
 
   entry: {
-    main: ['babel-polyfill', './index.jsx'],
+    main: ['babel-polyfill', './index.jsx', '@shopify/polaris/styles.css'],
   },
 
   output: {
@@ -115,6 +115,10 @@ module.exports = {
       {
         test: /\.(png|jpe?g|gif|woff|woff2|ttf|eot|ico)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         use: ['url-loader?limit=5000&name=[name].[hash].[ext]?'],
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
