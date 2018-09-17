@@ -31,7 +31,7 @@ const initialState: StateType = {
 
 const history: BrowserHistory = createHistory();
 const store: StoreType = configureStore(initialState, history);
-const CustomLinkComponent = ({ children, url, ...rest }): Node => {
+const CustomLinkComponent = ({ children, url, ...rest}): Node => { // eslint-disable-line
   return (
     <Link to={url} {...rest}>
       {children}
@@ -43,11 +43,9 @@ const Root = (): Node => (
   <AppProvider linkComponent={CustomLinkComponent}>
     <Provider store={store}>
       <ConnectedRouter history={history}>
-        <Page title="Example app">
-          <Card sectioned>
-            <Button onClick={() => alert('Button clicked!')}>Example button</Button>
-          </Card>
-        </Page>
+        <Layout>
+          {routes()}
+        </Layout>
       </ConnectedRouter>
     </Provider>
   </AppProvider>
